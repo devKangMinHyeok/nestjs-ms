@@ -3,15 +3,34 @@ import { ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '../config/config.module';
 
+/**
+ * @MongooseModule
+ * MongooseModule은 외부로 메서드를 반환하기 위한 외부 인터페이스의 역할을 한다.
+ * 내부 모듈은 MongooseCoreModule로, 실질적으로 로직이 돌아가는 곳은 MongooseCoreModule이다.
+ * 이는 MongooseCoreModule을 외부에 은닉하기 위함인데, 그래서 MongooseModule은
+ * mongooseCoreModule을 의존성 주입하지 않고, 직접 import 해서 사용한다.
+ *
+ * @forRootAsync_options
+ * forRootAsync에는 여러 옵션이 있다.
+ * imports는 주로, useFactory에 사용되는 모듈을 가져오는데 사용되고,
+ * inject도 마찬가지로, 주입할 provider 목록을 지정하는데 사용된다.
+ * 그래서 imports와 inject 속성을 통해, MongooseOptionsFactory를 생성하고 주입하는데 필요한
+ * 외부 모듈과 서비스를 지정할 수 있게 된다.
+ *
+ * 그리고 useFactory를 통해 비동기적으로 반환되는 값을 통해, 모듈 로드 시의 초기화 작업에서 원하는
+ * 값을 설정할 수 있게 된다. 즉, useFactory가 비동기적으로 값을 반환하고 초기화 작업을 하기 때문에,
+ * 이 모듈이 주입된 다른 모듈에서는 초기화 작업이 끝나야만 무조건 작업이 진행된다.
+ * 그 말은 이 서비스를 필요로 하는 다른 객체들이 이를 사용하기 전에 초기화 작업이 끝나는 것을 보장할 수 있다는 말이다.
+ * 이를 통해, 의존성 문제를 해결할 수 있다.
+ */
 @Module({
   imports: [
-    // MongooseModule.forRoot('mongodb://127.0.0.1:27017'),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
+      inject: [ConfigService],
       useFactory: (ConfigService: ConfigService) => ({
         uri: ConfigService.get('MONGODB_URI'),
       }),
-      inject: [ConfigService],
     }),
   ],
 })

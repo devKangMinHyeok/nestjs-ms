@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
+import { ModelDefinition, MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '../config/config.module';
 
 /**
@@ -40,4 +40,35 @@ import { ConfigModule } from '../config/config.module';
     }),
   ],
 })
-export class DatabaseModule {}
+export class DatabaseModule {
+  /**
+   *
+   * @static
+   * 정적 메서드, 인스턴스 생성 없이도 사용가능
+   * this 키워드 사용불가, 순수함수로 동작하기 좋음
+   *
+   * @forFeature
+   * MongooseModule의 static method로 `forFeature`가 존재함.
+   *
+   * ```ts
+   * static forFeature(
+   *   models: ModelDefinition[] = [],
+   *   connectionName?: string,
+   * ): DynamicModule {
+   *   const providers = createMongooseProviders(connectionName, models);
+   *   return {
+   *     module: MongooseModule,
+   *     providers: providers,
+   *     exports: providers,
+   *   };
+   * }
+   * ```
+   *
+   * 위와 같은 소스코드를 가지고 있음.
+   * models에는 ModelDefinition 타입의 원소들이 담겨있고,
+   * 이를 기반으로 providers를 생성하고 Module을 반환한다.
+   */
+  static forFeature(models: ModelDefinition[]) {
+    return MongooseModule.forFeature(models);
+  }
+}

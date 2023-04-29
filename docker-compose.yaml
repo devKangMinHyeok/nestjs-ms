@@ -5,6 +5,8 @@ services: # 각 서비스를 독립적으로 정의하고, 관리
       dockerfile: ./apps/reservations/Dockerfile # reservations 서비스의 도커 이미지를 빌드하기 위해 사용할 도커 파일(Dockerfile)의 경로를 지정
       target: development # 특정 스테이지(stage)를 빌드 대상으로 지정
     command: npm run start:dev reservations # 도커 컨테이너가 시작될 때 실행될 명령어
+    env_file:
+      - ./apps/reservations/.env
     ports:
       # 포트 바인딩(port binding)
       # 호스트 머신과 컨테이너 간에 포트를 공유하고, 동기화
@@ -22,6 +24,8 @@ services: # 각 서비스를 독립적으로 정의하고, 관리
       dockerfile: ./apps/auth/Dockerfile
       target: development
     command: npm run start:dev auth
+    env_file:
+      - ./apps/auth/.env
     ports:
       - '3001:3001'
     volumes:
